@@ -1,6 +1,12 @@
 import pygame
 import sys
-import subprocess  # To launch the game script
+import subprocess
+import os# To launch the game script
+
+game_path = os.path.join(os.path.dirname(__file__), "..", "Project", "project_version8.py")
+
+# Run the game
+
 
 # Initialize pygame
 pygame.init()
@@ -58,7 +64,7 @@ def main_menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if start_button.collidepoint(event.pos):
                     pygame.mixer.music.stop()
-                    subprocess.run(["python", "game.py"])  # Run the game file
+                    subprocess.run(["python", game_path])  # Run the game file
                     running = False
                 if exit_button.collidepoint(event.pos):
                     pygame.quit()
