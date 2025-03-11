@@ -44,7 +44,7 @@ RED_BULLET_IMAGE = pygame.transform.scale(RED_BULLET_IMAGE, (30, 15))
 
 # Laad en speel achtergrond muziek af
 pygame.mixer.music.load(MAIN_SOUND)
-pygame.mixer.music.set_volume(0.3)  # Zet het volume naar 50%
+pygame.mixer.music.set_volume(0.1)  # Zet het volume naar 50%
 pygame.mixer.music.play(-1, 0)  # Zet de muziek op repeat (-1) vanaf het begin (0.0)
 
 # Laad het engine geluid
@@ -119,23 +119,33 @@ class Tank:
             barrel_y = self.y + (TANK_HEIGHT // 2) * math.sin(math.radians(self.angle))
             bullet_dx = BULLET_SPEED * math.cos(math.radians(self.angle))
             bullet_dy = BULLET_SPEED * math.sin(math.radians(self.angle))
-            self.bullets.append([barrel_x, barrel_y, bullet_dx, bullet_dy])
+            
+            # Voeg rotatie toe aan de raket
+            if self.image == BLUE_TANK_IMAGE:
+            # Draai de blauwe raket 180° ten opzichte van de tank
+                bullet_image = pygame.transform.rotate(BLUE_BULLET_IMAGE, 180)
+            else:
+                bullet_image = RED_BULLET_IMAGE
+
+            rotated_bullet_image = pygame.transform.rotate(bullet_image, -self.angle)
+            
+            self.bullets.append([barrel_x, barrel_y, bullet_dx, bullet_dy, rotated_bullet_image])  # Voeg de geroteerde afbeelding toe aan de raket
             self.last_shot_time = current_time
     
     def update_bullets(self, opponent):
         for bullet in self.bullets[:]:
             bullet[0] += bullet[2]
             bullet[1] += bullet[3]
+            
+            # Verwijder de raket als hij buiten het scherm gaat
             if bullet[0] < 0 or bullet[0] > WIDTH or bullet[1] < 0 or bullet[1] > HEIGHT:
                 self.bullets.remove(bullet)
             elif opponent.hitbox().collidepoint(bullet[0], bullet[1]):
                 opponent.hit_count += 1
                 self.bullets.remove(bullet)
-            # Teken de juiste raketafbeelding afhankelijk van de tank
-            if self.image == BLUE_TANK_IMAGE:
-                screen.blit(BLUE_BULLET_IMAGE, (bullet[0] - BLUE_BULLET_IMAGE.get_width() // 2, bullet[1] - BLUE_BULLET_IMAGE.get_height() // 2))
-            elif self.image == RED_TANK_IMAGE:
-                screen.blit(RED_BULLET_IMAGE, (bullet[0] - RED_BULLET_IMAGE.get_width() // 2, bullet[1] - RED_BULLET_IMAGE.get_height() // 2))
+            
+            # Teken de raket met de juiste rotatie
+            screen.blit(bullet[4], (bullet[0] - bullet[4].get_width() // 2, bullet[1] - bullet[4].get_height() // 2))  # Gebruik de geroteerde afbeelding
 
     def hitbox(self):
         return pygame.Rect(self.x - TANK_WIDTH / 2, self.y - TANK_HEIGHT / 2, TANK_WIDTH, TANK_HEIGHT)
